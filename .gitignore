@@ -42,6 +42,11 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# --- Sublime
+
+*.sublime-project
+*.sublime-workspace
+
 # --- Added by Express
 
 # Logs

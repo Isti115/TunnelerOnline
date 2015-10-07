@@ -1,6 +1,6 @@
 {
   "name": "TunnelerOnline",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "A web based multiplayer recreation of the classic DOS game called Tunneler.",
   "private": false,
   "main": "./bin/www",
