@@ -1,5 +1,11 @@
-window.addEventListener("load", index_init, false);
+window.addEventListener('load', index_init, false);
 
 function index_init() {
-  console.log("Index initialized.");
+  var message = localStorage.getItem('message');
+  if (message !== null) {
+    document.getElementById('message').innerHTML = 'Message: ' + message;
+    localStorage.removeItem('message');
+  }
+  
+  console.log('Index initialized.');
 }

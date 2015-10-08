@@ -6,3 +6,11 @@ body {
 a {
   color: #00B7FF;
 }
+
+nav a {
+  padding: 10px;
+}
+
+#gameCanvas {
+  float: right;
+}

@@ -1,5 +1,5 @@
-window.addEventListener("load", init, false);
+window.addEventListener('load', init, false);
 
 function init() {
-  console.log("Main script initialized.");
+  console.log('Main script initialized.');
 }

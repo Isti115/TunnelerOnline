@@ -1,5 +1,13 @@
-window.addEventListener("load", lobby_init, false);
+window.addEventListener('load', lobby_init, false);
 
 function lobby_init() {
-  console.log("Lobby initialized.");
+  var roomName = location.hash;
+  
+  if (roomName == '') {
+    location.href = '/#NoRoomNameGiven';
+  }
+  
+  document.getElementById('roomName').innerHTML = 'Room name: ' + roomName;
+  
+  console.log('Lobby initialized.');
 }
