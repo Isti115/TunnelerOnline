@@ -1,3 +1,5 @@
+"use strict";
+
 window.addEventListener('load', lobby_init, false);
 
 function lobby_init() {
@@ -9,5 +11,15 @@ function lobby_init() {
   
   document.getElementById('roomName').innerHTML = 'Room name: ' + roomName;
   
+  messageOut({type: 'lobbyJoin', roomName: roomName});
+  
   console.log('Lobby initialized.');
+}
+
+function messageIn(message) {
+  console.log(message);
+  
+  if (message.type == 'id') {
+    localStorage.setItem('id', message.id);
+  }
 }

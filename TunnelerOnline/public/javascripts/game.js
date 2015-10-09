@@ -1,3 +1,5 @@
+"use strict";
+
 window.addEventListener('load', game_init, false);
 
 var roomName, playerId;
@@ -146,4 +148,8 @@ function drawTank() {
   gameContext.drawImage(directions[direction].image, 0, 0);
   
   gameContext.restore();
+}
+
+function messageIn(object) {
+  console.log(object);
 }
