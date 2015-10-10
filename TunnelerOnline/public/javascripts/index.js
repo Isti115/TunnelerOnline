@@ -3,14 +3,14 @@
 window.addEventListener('load', index_init, false);
 
 function index_init() {
-  var message = localStorage.getItem('message');
+  var message = sessionStorage.getItem('message');
   if (message !== null) {
     document.getElementById('message').innerHTML = 'Message: ' + message;
-    localStorage.removeItem('message');
+    sessionStorage.removeItem('message');
   }
   
-  if (localStorage.getItem('sessionID') !== null) {
-    localStorage.removeItem('sessionID');
+  if (sessionStorage.getItem('sessionID') !== null) {
+    sessionStorage.removeItem('sessionID');
   }
   
   console.log('Index initialized.');

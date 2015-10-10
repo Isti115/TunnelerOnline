@@ -2,7 +2,7 @@
 
 window.addEventListener('load', game_init, false);
 
-var roomName, playerId;
+var playerId;
 
 var keyDown = [];
 
@@ -22,13 +22,17 @@ var direction = 0, directions;
 var lastTime = -1, passedTime = 0, updateTime = 50;
 
 function game_init() {
-  if (localStorage.getItem('roomName') === null) {
-    localStorage.setItem('message', 'No game parameters given.');
+  if (sessionStorage.getItem('id') === null) {
+    sessionStorage.setItem('message', 'No game parameters given.');
     location.href = '/';
+    return;
   }
   
-  roomName = localStorage.getItem('roomName');
-  playerId = localStorage.getItem('playerId');
+  playerId = sessionStorage.getItem('id');
+  
+  webSocket.addEventListener('open', function() {
+    messageOut({type: 'gameJoin', sender: playerId});
+  }, false);
   
   window.addEventListener('keydown', function(e) {keyDown[e.keyCode] = true;}, false);
   window.addEventListener('keyup', function(e) {keyDown[e.keyCode] = false;}, false);
