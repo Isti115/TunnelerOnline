@@ -19,6 +19,9 @@ var shieldMeter = {x:88, y:360, width:176, height:16, color:'#28F0F0', value:100
 // var x = 0, y = 0;
 var direction = 0, directions;
 
+var tankColors = ['magenta', 'red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'];
+var tankImages = {};
+
 var status = 'connecting';
 var gameData = {players: []};
 
@@ -55,14 +58,14 @@ function game_init() {
   loadImages();
   
   directions = {
-    0: {move:{x: 0, y:-1}, image: tank, rotate: -90},
-    1: {move:{x: 1, y:-1}, image: tank_diagonal, rotate: -90},
-    2: {move:{x: 1, y: 0}, image: tank, rotate:   0},
-    3: {move:{x: 1, y: 1}, image: tank_diagonal, rotate:   0},
-    4: {move:{x: 0, y: 1}, image: tank, rotate:  90},
-    5: {move:{x:-1, y: 1}, image: tank_diagonal, rotate:  90},
-    6: {move:{x:-1, y: 0}, image: tank, rotate: 180},
-    7: {move:{x:-1, y:-1}, image: tank_diagonal, rotate: 180}
+    0: {move:{x: 0, y:-1}, image_type: 'tank', rotate: -90},
+    1: {move:{x: 1, y:-1}, image_type: 'tank_diagonal', rotate: -90},
+    2: {move:{x: 1, y: 0}, image_type: 'tank', rotate:   0},
+    3: {move:{x: 1, y: 1}, image_type: 'tank_diagonal', rotate:   0},
+    4: {move:{x: 0, y: 1}, image_type: 'tank', rotate:  90},
+    5: {move:{x:-1, y: 1}, image_type: 'tank_diagonal', rotate:  90},
+    6: {move:{x:-1, y: 0}, image_type: 'tank', rotate: 180},
+    7: {move:{x:-1, y:-1}, image_type: 'tank_diagonal', rotate: 180}
   };
   
   console.log('Game initialized.');
@@ -75,10 +78,15 @@ function loadImages() {
   frame.addEventListener('load', function(){frameContext.drawImage(frame, 0, 0);}, false);
   frame.src = '../images/frame.png';
   
-  tank = new Image();
-  tank.src = '../images/tank/blue_tank.png';
-  tank_diagonal = new Image();
-  tank_diagonal.src = '../images/tank/blue_tank_diagonal.png';
+  for (var i = 0; i < tankColors.length; i++) {
+    tankImages[tankColors[i]] = {};
+    
+    tankImages[tankColors[i]].tank = new Image();
+    tankImages[tankColors[i]].tank.src = '../images/tank/' + tankColors[i] + '_tank.png';
+    tankImages[tankColors[i]].tank_diagonal = new Image();
+    tankImages[tankColors[i]].tank_diagonal.src = '../images/tank/' + tankColors[i] + '_tank_diagonal.png';
+  }
+  
 }
 
 function rad(deg) {
@@ -143,7 +151,7 @@ function draw(dt) {
   drawMeter(shieldMeter);
   
   for (var i = 0; i < gameData.players.length; i++) {
-    drawTank(gameData.players[i].x, gameData.players[i].y, gameData.players[i].direction);
+    drawTank(gameData.players[i].x, gameData.players[i].y, gameData.players[i].direction, gameData.players[i].color);
   }
   
   frameContext.drawImage(gameCanvas, offsetX, offsetY);
@@ -161,13 +169,16 @@ function drawMeter(meter) {
   frameContext.restore();
 }
 
-function drawTank(x, y, direction) {
+function drawTank(x, y, direction, color) {
   gameContext.save();
   
   gameContext.translate(fieldCenterX + x*4, fieldCenterY + y*4);
   gameContext.rotate(rad(directions[direction].rotate));
-  gameContext.translate(-directions[direction].image.width / 2, -directions[direction].image.height / 2);
-  gameContext.drawImage(directions[direction].image, 0, 0);
+  
+  var currentImage = tankImages[color][directions[direction].image_type];
+  
+  gameContext.translate(-currentImage.width / 2, -currentImage.height / 2);
+  gameContext.drawImage(currentImage, 0, 0);
   
   gameContext.restore();
 }

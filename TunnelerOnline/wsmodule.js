@@ -25,6 +25,8 @@ var directions = {
   7: {x:-1, y:-1}
 };
 
+var tankColors = ['magenta', 'red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'];
+
 function connect(webSocketConnection) {
   webSocketConnection.addListener('message', receive(webSocketConnection));
   webSocketConnection.addListener('close', disconnect(webSocketConnection));
@@ -86,6 +88,8 @@ function receive(webSocketConnection) {
         currentRoom.state = 'connecting';
         
         for (var i = 0; i < currentRoom.players.length; i++) {
+          players[currentRoom.players[i]].color = tankColors[Math.floor(Math.random() * tankColors.length)];
+          
           players[currentRoom.players[i]].position = {x: 0, y: 0};
           players[currentRoom.players[i]].direction = 0;
           players[currentRoom.players[i]].moved = false;
@@ -196,7 +200,7 @@ function update() {
           currentPlayer.position.y += directions[currentPlayer.direction].y;
           currentPlayer.moved = false;
         }
-        gameData.players.push({x: currentPlayer.position.x, y: currentPlayer.position.y, direction: currentPlayer.direction});
+        gameData.players.push({x: currentPlayer.position.x, y: currentPlayer.position.y, direction: currentPlayer.direction, color: currentPlayer.color});
       }
       
       for (var i = 0; i < rooms[room].players.length; i++) {
