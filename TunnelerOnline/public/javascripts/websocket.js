@@ -1,6 +1,6 @@
 "use strict";
 
-var webSocket = new WebSocket('ws://localhost:3000/');
+var webSocket = new WebSocket('ws://' + location.host);
 
 var logIncomingMessages = false;
 

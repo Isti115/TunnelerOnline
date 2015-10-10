@@ -12,5 +12,9 @@ nav a {
 }
 
 #gameCanvas {
+  display: none;
+}
+
+#frameCanvas {
   float: right;
 }

@@ -7,17 +7,20 @@ var playerId;
 var keyDown = [];
 
 var gameCanvas, gameContext;
+var frameCanvas, frameContext;
 
 var frame, tank, tank_diagonal;
 
 var offsetX = 8, offsetY = 8, fieldWidth = 304, fieldHeight = 284;
-
 var fieldCenterX = offsetX + fieldWidth / 2, fieldCenterY = offsetY + fieldHeight / 2;
 var energyMeter = {x:88, y:316, width:176, height:16, color:'#F0E81C', value:100};
-var staminaMeter = {x:88, y:360, width:176, height:16, color:'#28F0F0', value:100};
+var shieldMeter = {x:88, y:360, width:176, height:16, color:'#28F0F0', value:100};
 
-var x = 0, y = 0;
+// var x = 0, y = 0;
 var direction = 0, directions;
+
+var status = 'connecting';
+var gameData = {players: []};
 
 var lastTime = -1, passedTime = 0, updateTime = 50;
 
@@ -40,8 +43,14 @@ function game_init() {
   gameCanvas = document.getElementById('gameCanvas');
   gameContext = gameCanvas.getContext('2d');
   
-  gameCanvas.width = 320;
-  gameCanvas.height = 400;
+  gameCanvas.width = fieldWidth;
+  gameCanvas.height = fieldHeight;
+  
+  frameCanvas = document.getElementById('frameCanvas');
+  frameContext = frameCanvas.getContext('2d');
+  
+  frameCanvas.width = 320;
+  frameCanvas.height = 400;
   
   loadImages();
   
@@ -63,7 +72,7 @@ function game_init() {
 
 function loadImages() {
   frame = new Image();
-  frame.addEventListener('load', function(){gameContext.drawImage(frame, 0, 0);}, false);
+  frame.addEventListener('load', function(){frameContext.drawImage(frame, 0, 0);}, false);
   frame.src = '../images/frame.png';
   
   tank = new Image();
@@ -93,7 +102,7 @@ function mainLoop(currentTime) {
   update(dt);
   draw(dt);
   
-  window.requestAnimationFrame(mainLoop, gameCanvas);
+  window.requestAnimationFrame(mainLoop, frameCanvas);
 }
 
 function update(dt) {
@@ -110,40 +119,49 @@ function update(dt) {
   if (keyDown[40] && keyDown[37]) {direction = 5; moving = true;}
   if (keyDown[37] && keyDown[38]) {direction = 7; moving = true;}
   
-  if (moving) {
-    x += directions[direction].move.x;
-    y += directions[direction].move.y;
-    
-    if (energyMeter.value > 0) {
-      energyMeter.value -= 0.5;
-    }
+  if (status == 'game' && moving) {
+    messageOut({type: 'move', sender: playerId, data: {direction: direction}});
   }
   
-  staminaMeter.value -= (dt / 1000);
+  // if (moving) {
+  //   x += directions[direction].move.x;
+  //   y += directions[direction].move.y;
+    
+  //   if (energyMeter.value > 0) {
+  //     energyMeter.value -= 0.5;
+  //   }
+  // }
+  
+  // shieldMeter.value -= (dt / 1000);
 }
 
 function draw(dt) {
-  gameContext.clearRect(offsetX, offsetY, fieldWidth, fieldHeight);
+  gameContext.clearRect(0, 0, fieldWidth, fieldHeight);
+  frameContext.clearRect(offsetX, offsetY, fieldWidth, fieldHeight);
   
   drawMeter(energyMeter);
-  drawMeter(staminaMeter);
+  drawMeter(shieldMeter);
   
-  drawTank();
+  for (var i = 0; i < gameData.players.length; i++) {
+    drawTank(gameData.players[i].x, gameData.players[i].y, gameData.players[i].direction);
+  }
+  
+  frameContext.drawImage(gameCanvas, offsetX, offsetY);
 }
 
 function drawMeter(meter) {
-  gameContext.save();
+  frameContext.save();
   
-  gameContext.fillStyle = '#000000';
-  gameContext.fillRect(meter.x, meter.y, meter.width, meter.height);
+  frameContext.fillStyle = '#000000';
+  frameContext.fillRect(meter.x, meter.y, meter.width, meter.height);
   
-  gameContext.fillStyle = meter.color;
-  gameContext.fillRect(meter.x, meter.y, meter.width * (meter.value / 100), meter.height);
+  frameContext.fillStyle = meter.color;
+  frameContext.fillRect(meter.x, meter.y, meter.width * (meter.value / 100), meter.height);
   
-  gameContext.restore();
+  frameContext.restore();
 }
 
-function drawTank() {
+function drawTank(x, y, direction) {
   gameContext.save();
   
   gameContext.translate(fieldCenterX + x*4, fieldCenterY + y*4);
@@ -154,6 +172,12 @@ function drawTank() {
   gameContext.restore();
 }
 
-function messageIn(object) {
-  console.log(object);
+function messageIn(message) {
+  if (message.type == 'statusUpdate') {
+    status = message.data.status;
+  }
+  
+  if (message.type == 'gameUpdate') {
+    gameData = message.data;
+  }
 }

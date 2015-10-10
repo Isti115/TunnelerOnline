@@ -16,6 +16,6 @@ function index_init() {
   console.log('Index initialized.');
 }
 
-function messageIn(object) {
-  console.log(object);
+function messageIn(message) {
+  console.log(message);
 }

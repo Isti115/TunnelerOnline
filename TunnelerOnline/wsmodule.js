@@ -1,3 +1,5 @@
+"use strict";
+
 var WebSocketServer = require('ws').Server;
 
 module.exports.init = function(server) {
@@ -8,18 +10,29 @@ module.exports.init = function(server) {
   setInterval(update, 1000/60);
 };
 
-var clients = [];
+// var clients = [];
 var rooms = {};
 var players = {};
+
+var directions = {
+  0: {x: 0, y:-1},
+  1: {x: 1, y:-1},
+  2: {x: 1, y: 0},
+  3: {x: 1, y: 1},
+  4: {x: 0, y: 1},
+  5: {x:-1, y: 1},
+  6: {x:-1, y: 0},
+  7: {x:-1, y:-1}
+};
 
 function connect(webSocketConnection) {
   webSocketConnection.addListener('message', receive(webSocketConnection));
   webSocketConnection.addListener('close', disconnect(webSocketConnection));
   
-  clients.push(webSocketConnection);
+  // clients.push(webSocketConnection);
   
-  console.log('client connected with ip: ' + webSocketConnection._socket.remoteAddress);
-  console.log('client count: ' + clients.length);
+  // console.log('client connected with ip: ' + webSocketConnection._socket.remoteAddress);
+  // console.log('client count: ' + clients.length);
 }
 
 function receive(webSocketConnection) {
@@ -63,12 +76,23 @@ function receive(webSocketConnection) {
     if (parsedMessage.type == 'gameStart') {
       console.log("started");
       
+      if (!(parsedMessage.sender in players)) {
+        return; // TODO: throw back to index
+      }
+      
       var currentRoom = rooms[players[parsedMessage.sender].roomName];
       
       if (currentRoom.owner == parsedMessage.sender) {
-        currentRoom.state = 'game';
+        currentRoom.state = 'connecting';
         
         for (var i = 0; i < currentRoom.players.length; i++) {
+          players[currentRoom.players[i]].position = {x: 0, y: 0};
+          players[currentRoom.players[i]].direction = 0;
+          players[currentRoom.players[i]].moved = false;
+          
+          players[currentRoom.players[i]].energy = 100;
+          players[currentRoom.players[i]].shield = 100;
+          
           players[currentRoom.players[i]].state = 'connecting';
           players[currentRoom.players[i]].connection.send(JSON.stringify({type: 'gameStart'}));
         }
@@ -78,9 +102,24 @@ function receive(webSocketConnection) {
     if (parsedMessage.type == 'gameJoin') {
       console.log("gameJoined");
       
+      if (!(parsedMessage.sender in players)) {
+        return; // TODO: throw back to index
+      }
+      
       players[parsedMessage.sender].connection = webSocketConnection;
       
       players[parsedMessage.sender].state = 'game';
+    }
+    
+    if (parsedMessage.type == 'move') {
+      console.log("moved");
+      
+      if (!(parsedMessage.sender in players)) {
+        return; // TODO: throw back to index
+      }
+      
+      players[parsedMessage.sender].direction = parsedMessage.data.direction;
+      players[parsedMessage.sender].moved = true;
     }
   }
 }
@@ -109,14 +148,14 @@ function disconnect(webSocketConnection) {
       delete players[webSocketConnection.id];
     }
     
-    clients.splice(clients.indexOf(webSocketConnection), 1);
-    console.log('client disconnected. remaining: ' + clients.length);
+    // clients.splice(clients.indexOf(webSocketConnection), 1);
+    // console.log('client disconnected. remaining: ' + clients.length);
   }
 }
 
 function update() {
-  console.log(rooms);
-  for (room in rooms) {
+  // console.log(rooms);
+  for (var room in rooms) {
     if (rooms[room].state == 'lobby') {
       var lobbyData = {};
       
@@ -126,11 +165,43 @@ function update() {
         players[rooms[room].players[i]].connection.send(JSON.stringify({type: 'lobbyUpdate', data: lobbyData}));
       }
     }
+    
+    if (rooms[room].state == 'connecting') {
+      var canStart = true;
+      var i = 0;
+      while (canStart && i < rooms[room].players.length) {
+        if (players[rooms[room].players[i]].state == 'connecting') {
+          canStart = false;
+        }
+        i++;
+      }
+      
+      if (canStart) {
+        rooms[room].state = 'game';
+        
+        for (var i = 0; i < rooms[room].players.length; i++) {
+          players[rooms[room].players[i]].connection.send(JSON.stringify({type: 'statusUpdate', data: {status: 'game'}}));
+        }
+      }
+    }
+    
+    if (rooms[room].state == 'game') {
+      var gameData = {};
+      gameData.players = [];
+      
+      for (var i = 0; i < rooms[room].players.length; i++) {
+        var currentPlayer = players[rooms[room].players[i]];
+        if (currentPlayer.moved) {
+          currentPlayer.position.x += directions[currentPlayer.direction].x;
+          currentPlayer.position.y += directions[currentPlayer.direction].y;
+          currentPlayer.moved = false;
+        }
+        gameData.players.push({x: currentPlayer.position.x, y: currentPlayer.position.y, direction: currentPlayer.direction});
+      }
+      
+      for (var i = 0; i < rooms[room].players.length; i++) {
+        players[rooms[room].players[i]].connection.send(JSON.stringify({type: 'gameUpdate', data: gameData}));
+      }
+    }
   }
 }
-
-// module.exports.broadcast = function(data) {
-//   for (var i = 0; i < clients.length; i++) {
-//     clients[i].send(JSON.stringify(data));
-//   }
-// }
