@@ -4,6 +4,24 @@ block scripts
   script(src='/javascripts/index.js')
 
 block content
-  h1 Home
-  p Welcome to TunnelerOnline
+  div#createGameDiv.startGameDiv
+    h3 New Game
+    form#newGameForm
+      p Name
+        input.formField(type='text' name='name')
+      input(type='submit' value='Create Game').button
+  div#joinGameDiv.startGameDiv
+    h3 Join Game
+    form#joinGameForm
+      p Name
+        input.formField(type='text' name='name')
+      p Lobby
+        input.formField(type='text' name='name')
+      input(type='submit' value='Join Game').button
+  h1 About Tunneler Online
+  p Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam vehicula mi id lobortis tempus. Phasellus non nulla diam. Aliquam tellus est, cursus ac eros nec, feugiat gravida enim. Proin at eros a enim hendrerit accumsan non ut nunc. Curabitur lacinia rhoncus mauris, nec laoreet dui fringilla a. Nunc et egestas tellus. Vestibulum vestibulum felis ut euismod commodo.
+
+  p Nam libero magna, posuere ut ante eu, hendrerit aliquet urna. Praesent tincidunt rhoncus erat eu tristique. Maecenas eu lorem quis odio pellentesque cursus non porttitor tellus. Phasellus pharetra nibh eu massa eleifend laoreet. Cras vestibulum lacus leo, a feugiat tellus congue sit amet. Fusce ut magna sem. Sed vel pharetra magna, non fermentum dui. Nulla sed aliquam turpis. Aliquam ac posuere turpis, ut ultrices tortor. Mauris iaculis feugiat ex non commodo. Proin sagittis ornare elit, vitae rhoncus urna suscipit euismod. Morbi aliquam pulvinar gravida. Donec sapien dolor, interdum eget magna elementum, iaculis bibendum nibh. Morbi sapien nunc, mattis non euismod eget, fermentum vitae ex.
+
+  p Quisque iaculis nisi blandit elementum vestibulum. Cras molestie eros erat, nec pretium nisi aliquam quis. Cras mi justo, lobortis ut rhoncus vel, egestas ac justo. Etiam eget metus non dolor elementum ultrices quis a odio. Fusce varius quis nulla eu tincidunt. Ut lobortis quam turpis, vitae lobortis nisi porta imperdiet. Aliquam mollis tristique gravida. Aenean odio risus, aliquet vel tincidunt nec, tincidunt feugiat massa.
   p#message
