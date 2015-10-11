@@ -15,8 +15,10 @@ function lobby_init() {
   document.getElementById('roomName').innerHTML = 'Room name: ' + roomName;
   
   webSocket.addEventListener('open', function() {
-    messageOut({type: 'lobbyJoin', data: {roomName: roomName}});
+    messageOut({type: 'lobbyJoin', data: {userName: sessionStorage.getItem('userName'), roomName: roomName}});
   }, false);
+  
+  document.getElementById('startGameButton').addEventListener('click', startGame, false);
   
   console.log('Lobby initialized.');
 }

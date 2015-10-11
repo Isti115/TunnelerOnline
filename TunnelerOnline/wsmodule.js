@@ -57,6 +57,7 @@ function receive(webSocketConnection) {
       webSocketConnection.id = id;
       currentPlayer.connection.send(JSON.stringify({type: 'id', data: {id: id}}));
       
+      currentPlayer.userName = parsedMessage.data.userName;
       currentPlayer.roomName = parsedMessage.data.roomName;
       currentPlayer.state = 'lobby';
       
@@ -187,7 +188,11 @@ function update() {
     if (rooms[room].state == 'lobby') {
       var lobbyData = {};
       
-      lobbyData.players = rooms[room].players;
+      lobbyData.players = [];
+      
+      for (var i = 0; i < rooms[room].players.length; i++) {
+        lobbyData.players.push(players[rooms[room].players[i]].userName + " : " + rooms[room].players[i]);
+      }
       
       for (var i = 0; i < rooms[room].players.length; i++) {
         players[rooms[room].players[i]].connection.send(JSON.stringify({type: 'lobbyUpdate', data: lobbyData}));

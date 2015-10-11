@@ -13,6 +13,22 @@ function index_init() {
     sessionStorage.removeItem('sessionID');
   }
   
+  location.hash = '';
+  
+  document.getElementById('createGameButton').addEventListener('click', function() {
+    sessionStorage.setItem('userName', document.getElementById('startUserName').value);
+    
+    location.hash = document.getElementById('createGameLobbyName').value;
+    location.pathname = '/lobby';
+  }, false);
+  
+  document.getElementById('joinGameButton').addEventListener('click', function() {
+    sessionStorage.setItem('userName', document.getElementById('joinUserName').value);
+    
+    location.hash = document.getElementById('joinGameLobbyName').value;
+    location.pathname = '/lobby';
+  }, false);
+  
   console.log('Index initialized.');
 }
 
