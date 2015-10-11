@@ -13,17 +13,16 @@ var frame, tank, tank_diagonal;
 
 var offsetX = 8, offsetY = 8, fieldWidth = 304, fieldHeight = 284;
 var fieldCenterX = offsetX + fieldWidth / 2, fieldCenterY = offsetY + fieldHeight / 2;
-var energyMeter = {x:88, y:316, width:176, height:16, color:'#F0E81C', value:100};
-var shieldMeter = {x:88, y:360, width:176, height:16, color:'#28F0F0', value:100};
+var energyMeter = {x: 88, y: 316, width: 176, height: 16, color: '#F0E81C', value: 100};
+var shieldMeter = {x: 88, y: 360, width: 176, height: 16, color: '#28F0F0', value: 100};
 
-// var x = 0, y = 0;
 var direction = 0, directions;
 
 var tankColors = ['magenta', 'red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'];
 var tankImages = {};
 
 var status = 'connecting';
-var gameData = {players: []};
+var gameData = {players: [], shots: []};
 
 var lastTime = -1, passedTime = 0, updateTime = 50;
 
@@ -40,7 +39,11 @@ function game_init() {
     messageOut({type: 'gameJoin', sender: playerId});
   }, false);
   
-  window.addEventListener('keydown', function(e) {keyDown[e.keyCode] = true;}, false);
+  window.addEventListener('keydown', function(e) {keyDown[e.keyCode] = true;
+    if ([32, 37, 38, 39, 40].indexOf(e.keyCode) != -1) {
+      e.preventDefault();
+    }
+  }, false);
   window.addEventListener('keyup', function(e) {keyDown[e.keyCode] = false;}, false);
   
   gameCanvas = document.getElementById('gameCanvas');
@@ -131,16 +134,9 @@ function update(dt) {
     messageOut({type: 'move', sender: playerId, data: {direction: direction}});
   }
   
-  // if (moving) {
-  //   x += directions[direction].move.x;
-  //   y += directions[direction].move.y;
-    
-  //   if (energyMeter.value > 0) {
-  //     energyMeter.value -= 0.5;
-  //   }
-  // }
-  
-  // shieldMeter.value -= (dt / 1000);
+  if (keyDown[32]) {
+    messageOut({type: 'shot', sender: playerId});
+  }
 }
 
 function draw(dt) {
@@ -152,6 +148,14 @@ function draw(dt) {
   
   for (var i = 0; i < gameData.players.length; i++) {
     drawTank(gameData.players[i].x, gameData.players[i].y, gameData.players[i].direction, gameData.players[i].color);
+  }
+  
+  for (var i = 0; i < gameData.shots.length; i++) {
+    gameContext.fillStyle = "#aa0000";
+    gameContext.fillRect((gameData.shots[i].position.x - directions[gameData.shots[i].direction].move.x) * 4 - 2 ,
+                         (gameData.shots[i].position.y - directions[gameData.shots[i].direction].move.y) * 4 - 2, 4, 4);
+    gameContext.fillStyle = "#ee0000";
+    gameContext.fillRect(gameData.shots[i].position.x * 4 - 2, gameData.shots[i].position.y * 4 - 2, 4, 4);
   }
   
   frameContext.drawImage(gameCanvas, offsetX, offsetY);
@@ -172,7 +176,7 @@ function drawMeter(meter) {
 function drawTank(x, y, direction, color) {
   gameContext.save();
   
-  gameContext.translate(fieldCenterX + x*4, fieldCenterY + y*4);
+  gameContext.translate(x*4, y*4);
   gameContext.rotate(rad(directions[direction].rotate));
   
   var currentImage = tankImages[color][directions[direction].image_type];

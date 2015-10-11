@@ -7,7 +7,7 @@ module.exports.init = function(server) {
   
   webSocketServer.addListener('connection', connect);
   
-  setInterval(update, 1000/60);
+  setInterval(update, 1000/25);
 };
 
 // var clients = [];
@@ -90,9 +90,12 @@ function receive(webSocketConnection) {
         for (var i = 0; i < currentRoom.players.length; i++) {
           players[currentRoom.players[i]].color = tankColors[Math.floor(Math.random() * tankColors.length)];
           
-          players[currentRoom.players[i]].position = {x: 0, y: 0};
+          players[currentRoom.players[i]].position = {x: 38, y: 35.5};
           players[currentRoom.players[i]].direction = 0;
           players[currentRoom.players[i]].moved = false;
+          
+          players[currentRoom.players[i]].shots = [];
+          players[currentRoom.players[i]].coolDown = 0;
           
           players[currentRoom.players[i]].energy = 100;
           players[currentRoom.players[i]].shield = 100;
@@ -111,6 +114,7 @@ function receive(webSocketConnection) {
       }
       
       players[parsedMessage.sender].connection = webSocketConnection;
+      webSocketConnection.id = parsedMessage.sender;
       
       players[parsedMessage.sender].state = 'game';
     }
@@ -124,6 +128,26 @@ function receive(webSocketConnection) {
       
       players[parsedMessage.sender].direction = parsedMessage.data.direction;
       players[parsedMessage.sender].moved = true;
+    }
+    
+    if (parsedMessage.type == 'shot') {
+      console.log("shot");
+      
+      if (!(parsedMessage.sender in players)) {
+        return; // TODO: throw back to index
+      }
+      
+      var currentPlayer = players[parsedMessage.sender];
+      
+      if (currentPlayer.coolDown > 0) {
+        currentPlayer.coolDown--;
+        return;
+      }
+      
+      if (currentPlayer.shots.length < 5) {
+        currentPlayer.shots.push({position: JSON.parse(JSON.stringify(currentPlayer.position)), direction: currentPlayer.direction});
+        currentPlayer.coolDown = 5;
+      }
     }
   }
 }
@@ -148,7 +172,7 @@ function disconnect(webSocketConnection) {
       if (rooms[players[webSocketConnection.id].roomName].players.length == 0) {
         delete rooms[players[webSocketConnection.id].roomName];
       }
-      
+      console.log('quit ' + webSocketConnection.id);
       delete players[webSocketConnection.id];
     }
     
@@ -192,6 +216,7 @@ function update() {
     if (rooms[room].state == 'game') {
       var gameData = {};
       gameData.players = [];
+      gameData.shots = [];
       
       for (var i = 0; i < rooms[room].players.length; i++) {
         var currentPlayer = players[rooms[room].players[i]];
@@ -200,7 +225,14 @@ function update() {
           currentPlayer.position.y += directions[currentPlayer.direction].y;
           currentPlayer.moved = false;
         }
+        
+        for (var j = 0; j < currentPlayer.shots.length; j++) {
+          currentPlayer.shots[j].position.x += directions[currentPlayer.shots[j].direction].x;
+          currentPlayer.shots[j].position.y += directions[currentPlayer.shots[j].direction].y;
+        }
+        
         gameData.players.push({x: currentPlayer.position.x, y: currentPlayer.position.y, direction: currentPlayer.direction, color: currentPlayer.color});
+        gameData.shots = gameData.shots.concat(currentPlayer.shots);
       }
       
       for (var i = 0; i < rooms[room].players.length; i++) {
