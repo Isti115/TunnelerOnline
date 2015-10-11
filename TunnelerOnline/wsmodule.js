@@ -1,8 +1,57 @@
-"use strict";
+'use strict';
+
+var rooms = {};
+var players = {};
+
+var tank_shape = [
+  [-2, -2], [-1, -2], [0, -2], [1, -2], [2, -2],
+            [-1, -1], [0, -1], [1, -1],
+            [-1,  0], [0,  0], [1,  0], [2,  0], [3,  0],
+            [-1,  1], [0,  1], [1,  1],
+  [-2,  2], [-1,  2], [0,  2], [1,  2], [2,  2]
+];
+
+var diagonal_tank_shape = [
+                                [0, -3],
+                                [0, -2], [1, -2],
+                      [-1, -1], [0, -1], [1, -1], [2, -1],
+  [-3,  0], [-2,  0], [-1,  0], [0,  0], [1,  0], [2,  0], [3,  0],
+            [-2,  1], [-1,  1], [0,  1], [1,  1],
+                      [-1,  2], [0,  2],          [2,  2],
+                                [0,  3]
+];
+
+var directions = {
+  0: {move: {x: 0, y:-1}},
+  1: {move: {x: 1, y:-1}},
+  2: {move: {x: 1, y: 0}},
+  3: {move: {x: 1, y: 1}},
+  4: {move: {x: 0, y: 1}},
+  5: {move: {x:-1, y: 1}},
+  6: {move: {x:-1, y: 0}},
+  7: {move: {x:-1, y:-1}}
+};
+
+var tankColors = ['magenta', 'red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'];
 
 var WebSocketServer = require('ws').Server;
 
 module.exports.init = function(server) {
+  directions[2].shape = JSON.parse(JSON.stringify(tank_shape));
+  directions[3].shape = JSON.parse(JSON.stringify(diagonal_tank_shape));
+  rotateShape(tank_shape);
+  rotateShape(diagonal_tank_shape);
+  directions[4].shape = JSON.parse(JSON.stringify(tank_shape));
+  directions[5].shape = JSON.parse(JSON.stringify(diagonal_tank_shape));
+  rotateShape(tank_shape);
+  rotateShape(diagonal_tank_shape);
+  directions[6].shape = JSON.parse(JSON.stringify(tank_shape));
+  directions[7].shape = JSON.parse(JSON.stringify(diagonal_tank_shape));
+  rotateShape(tank_shape);
+  rotateShape(diagonal_tank_shape);
+  directions[0].shape = JSON.parse(JSON.stringify(tank_shape));
+  directions[1].shape = JSON.parse(JSON.stringify(diagonal_tank_shape));
+  
   var webSocketServer = new WebSocketServer({server:server});
   
   webSocketServer.addListener('connection', connect);
@@ -10,31 +59,15 @@ module.exports.init = function(server) {
   setInterval(update, 1000/25);
 };
 
-// var clients = [];
-var rooms = {};
-var players = {};
-
-var directions = {
-  0: {x: 0, y:-1},
-  1: {x: 1, y:-1},
-  2: {x: 1, y: 0},
-  3: {x: 1, y: 1},
-  4: {x: 0, y: 1},
-  5: {x:-1, y: 1},
-  6: {x:-1, y: 0},
-  7: {x:-1, y:-1}
-};
-
-var tankColors = ['magenta', 'red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'];
+function rotateShape(shape) {
+  for (var i = 0; i < shape.length; i++) {
+    shape[i] = [shape[i][1], -shape[i][0]];
+  }
+}
 
 function connect(webSocketConnection) {
   webSocketConnection.addListener('message', receive(webSocketConnection));
   webSocketConnection.addListener('close', disconnect(webSocketConnection));
-  
-  // clients.push(webSocketConnection);
-  
-  // console.log('client connected with ip: ' + webSocketConnection._socket.remoteAddress);
-  // console.log('client count: ' + clients.length);
 }
 
 function receive(webSocketConnection) {
@@ -43,7 +76,7 @@ function receive(webSocketConnection) {
     console.log(parsedMessage);
     
     if (parsedMessage.type == 'lobbyJoin') {
-      console.log("joined");
+      console.log('joined');
       
       var currentPlayer = {};
       
@@ -77,7 +110,7 @@ function receive(webSocketConnection) {
     }
     
     if (parsedMessage.type == 'gameStart') {
-      console.log("started");
+      console.log('started');
       
       if (!(parsedMessage.sender in players)) {
         return; // TODO: throw back to index
@@ -87,11 +120,22 @@ function receive(webSocketConnection) {
       
       if (currentRoom.owner == parsedMessage.sender) {
         currentRoom.state = 'connecting';
+        currentRoom.terrain = {};
+        
+        for (var x = 0; x < 76; x++) {
+          currentRoom.terrain[x + '|' +  0] = {type: 'rock'};
+          currentRoom.terrain[x + '|' + 71] = {type: 'rock'};
+        }
+        
+        for (var y = 0; y < 71; y++) {
+          currentRoom.terrain[ 0 + '|' + y] = {type: 'rock'};
+          currentRoom.terrain[76 + '|' + y] = {type: 'rock'};
+        }
         
         for (var i = 0; i < currentRoom.players.length; i++) {
           players[currentRoom.players[i]].color = tankColors[Math.floor(Math.random() * tankColors.length)];
           
-          players[currentRoom.players[i]].position = {x: 38, y: 35.5};
+          players[currentRoom.players[i]].position = {x: 38, y: 35};
           players[currentRoom.players[i]].direction = 0;
           players[currentRoom.players[i]].moved = false;
           
@@ -108,7 +152,7 @@ function receive(webSocketConnection) {
     }
     
     if (parsedMessage.type == 'gameJoin') {
-      console.log("gameJoined");
+      console.log('gameJoined');
       
       if (!(parsedMessage.sender in players)) {
         return; // TODO: throw back to index
@@ -121,7 +165,7 @@ function receive(webSocketConnection) {
     }
     
     if (parsedMessage.type == 'move') {
-      console.log("moved");
+      console.log('moved');
       
       if (!(parsedMessage.sender in players)) {
         return; // TODO: throw back to index
@@ -132,7 +176,7 @@ function receive(webSocketConnection) {
     }
     
     if (parsedMessage.type == 'shot') {
-      console.log("shot");
+      console.log('shot');
       
       if (!(parsedMessage.sender in players)) {
         return; // TODO: throw back to index
@@ -141,21 +185,21 @@ function receive(webSocketConnection) {
       var currentPlayer = players[parsedMessage.sender];
       
       if (currentPlayer.coolDown > 0) {
-        currentPlayer.coolDown--;
         return;
       }
       
       if (currentPlayer.shots.length < 5) {
-        currentPlayer.shots.push({position: JSON.parse(JSON.stringify(currentPlayer.position)), direction: currentPlayer.direction});
-        currentPlayer.coolDown = 5;
+        currentPlayer.shots.push({position: {x: currentPlayer.position.x + directions[currentPlayer.direction].move.x * 4,
+                                             y: currentPlayer.position.y + directions[currentPlayer.direction].move.y * 4,
+                                            }, direction: currentPlayer.direction});
+        
+        currentPlayer.coolDown = 10;
       }
     }
   }
 }
 
 function getRandomId(length) {
-  // return Math.floor(1000000000 + Math.random() * 9000000000);
-  
   var characters = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   var id = '';
   
@@ -176,9 +220,6 @@ function disconnect(webSocketConnection) {
       console.log('quit ' + webSocketConnection.id);
       delete players[webSocketConnection.id];
     }
-    
-    // clients.splice(clients.indexOf(webSocketConnection), 1);
-    // console.log('client disconnected. remaining: ' + clients.length);
   }
 }
 
@@ -191,7 +232,7 @@ function update() {
       lobbyData.players = [];
       
       for (var i = 0; i < rooms[room].players.length; i++) {
-        lobbyData.players.push(players[rooms[room].players[i]].userName + " : " + rooms[room].players[i]);
+        lobbyData.players.push(players[rooms[room].players[i]].userName + ' : ' + rooms[room].players[i]);
       }
       
       for (var i = 0; i < rooms[room].players.length; i++) {
@@ -220,28 +261,59 @@ function update() {
     
     if (rooms[room].state == 'game') {
       var gameData = {};
+      
+      gameData.map = JSON.parse(JSON.stringify(rooms[room].terrain));
+      
       gameData.players = [];
       gameData.shots = [];
       
       for (var i = 0; i < rooms[room].players.length; i++) {
         var currentPlayer = players[rooms[room].players[i]];
         if (currentPlayer.moved) {
-          currentPlayer.position.x += directions[currentPlayer.direction].x;
-          currentPlayer.position.y += directions[currentPlayer.direction].y;
+          currentPlayer.position.x += directions[currentPlayer.direction].move.x;
+          currentPlayer.position.y += directions[currentPlayer.direction].move.y;
           currentPlayer.moved = false;
         }
         
-        for (var j = 0; j < currentPlayer.shots.length; j++) {
-          currentPlayer.shots[j].position.x += directions[currentPlayer.shots[j].direction].x;
-          currentPlayer.shots[j].position.y += directions[currentPlayer.shots[j].direction].y;
+        for (var j = 0; j < directions[currentPlayer.direction].shape.length; j++) {
+          gameData.map[(currentPlayer.position.x + directions[currentPlayer.direction].shape[j][0]) + '|' +
+                       (currentPlayer.position.y + directions[currentPlayer.direction].shape[j][1])] = {type: 'player', id: rooms[room].players[i]};
         }
         
         gameData.players.push({x: currentPlayer.position.x, y: currentPlayer.position.y, direction: currentPlayer.direction, color: currentPlayer.color});
+      }
+      
+      for (var i = 0; i < rooms[room].players.length; i++) {
+        var currentPlayer = players[rooms[room].players[i]];
+        
+        if (currentPlayer.coolDown > 0) {
+          currentPlayer.coolDown--;
+        }
+        
+        for (var j = 0; j < currentPlayer.shots.length; j++) {
+          currentPlayer.shots[j].position.x += directions[currentPlayer.shots[j].direction].move.x;
+          currentPlayer.shots[j].position.y += directions[currentPlayer.shots[j].direction].move.y;
+          
+          var currentPosition = gameData.map[currentPlayer.shots[j].position.x + '|' + currentPlayer.shots[j].position.y];
+          
+          if (currentPosition != null) {
+            if (currentPosition.type == 'player') {
+              players[currentPosition.id].shield -= 10;
+              console.log(players[currentPosition.id]);
+              if (players[currentPosition.id].shield <= 0) {
+                players[currentPosition.id].position.y = 0;
+              }
+            }
+            currentPlayer.shots.splice(j, 1);
+          }
+        }
+        
         gameData.shots = gameData.shots.concat(currentPlayer.shots);
       }
       
       for (var i = 0; i < rooms[room].players.length; i++) {
         players[rooms[room].players[i]].connection.send(JSON.stringify({type: 'gameUpdate', data: gameData}));
+        players[rooms[room].players[i]].connection.send(JSON.stringify({type: 'meterUpdate', data: {energy: players[rooms[room].players[i]].energy, shield: players[rooms[room].players[i]].shield}}));
       }
     }
   }

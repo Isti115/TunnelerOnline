@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 window.addEventListener('load', lobby_init, false);
 
@@ -34,7 +34,7 @@ function messageIn(message) {
     var roomInfo = '';
     
     for (var i = 0; i < message.data.players.length; i++) {
-      roomInfo += message.data.players[i] + '\n';
+      roomInfo += message.data.players[i] + '<br />';
     }
     
     document.getElementById('roomInfo').innerHTML = roomInfo;

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 window.addEventListener('load', game_init, false);
 
@@ -43,6 +43,7 @@ function game_init() {
     if ([32, 37, 38, 39, 40].indexOf(e.keyCode) != -1) {
       e.preventDefault();
     }
+    // update(0);
   }, false);
   window.addEventListener('keyup', function(e) {keyDown[e.keyCode] = false;}, false);
   
@@ -89,7 +90,6 @@ function loadImages() {
     tankImages[tankColors[i]].tank_diagonal = new Image();
     tankImages[tankColors[i]].tank_diagonal.src = '../images/tank/' + tankColors[i] + '_tank_diagonal.png';
   }
-  
 }
 
 function rad(deg) {
@@ -176,7 +176,7 @@ function drawMeter(meter) {
 function drawTank(x, y, direction, color) {
   gameContext.save();
   
-  gameContext.translate(x*4, y*4);
+  gameContext.translate(x * 4, y * 4);
   gameContext.rotate(rad(directions[direction].rotate));
   
   var currentImage = tankImages[color][directions[direction].image_type];
@@ -194,5 +194,10 @@ function messageIn(message) {
   
   if (message.type == 'gameUpdate') {
     gameData = message.data;
+  }
+  
+  if (message.type == 'meterUpdate') {
+    energyMeter.value = message.data.energy;
+    shieldMeter.value = message.data.shield;
   }
 }

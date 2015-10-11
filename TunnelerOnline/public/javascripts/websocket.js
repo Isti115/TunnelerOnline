@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var webSocket = new WebSocket('ws://' + location.host);
 
