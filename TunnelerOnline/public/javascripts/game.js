@@ -19,6 +19,16 @@ var shieldMeter = {x: 88, y: 360, width: 176, height: 16, color: '#28F0F0', valu
 var direction = 0, directions;
 
 var tankColors = ['magenta', 'red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'];
+var tankColorCodes = {
+  'magenta': '#cd8ed9',
+  'red': '#d98e8e',
+  'orange': '#e1b487',
+  'yellow': '#d9d98e',
+  'green': '#00fc00',
+  'cyan': '#8ed9d9',
+  'blue': '#2c2cfc',
+  'purple': '#b38ed9'
+};
 var tankImages = {};
 
 var status = 'connecting';
@@ -34,9 +44,10 @@ function game_init() {
   }
   
   playerId = sessionStorage.getItem('id');
+  var color = sessionStorage.getItem('color');
   
   webSocket.addEventListener('open', function() {
-    messageOut({type: 'gameJoin', sender: playerId});
+    messageOut({type: 'gameJoin', sender: playerId, data: {color: color}});
   }, false);
   
   window.addEventListener('keydown', function(e) {keyDown[e.keyCode] = true;

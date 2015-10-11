@@ -133,8 +133,6 @@ function receive(webSocketConnection) {
         }
         
         for (var i = 0; i < currentRoom.players.length; i++) {
-          players[currentRoom.players[i]].color = tankColors[Math.floor(Math.random() * tankColors.length)];
-          
           players[currentRoom.players[i]].position = {x: 38, y: 35};
           players[currentRoom.players[i]].direction = 0;
           players[currentRoom.players[i]].moved = false;
@@ -160,6 +158,8 @@ function receive(webSocketConnection) {
       
       players[parsedMessage.sender].connection = webSocketConnection;
       webSocketConnection.id = parsedMessage.sender;
+      
+      players[parsedMessage.sender].color = parsedMessage.data.color;
       
       players[parsedMessage.sender].state = 'game';
     }
@@ -260,6 +260,7 @@ function update() {
     }
     
     if (rooms[room].state == 'game') {
+      console.log(rooms);
       var gameData = {};
       
       gameData.map = JSON.parse(JSON.stringify(rooms[room].terrain));
