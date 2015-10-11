@@ -1,14 +1,59 @@
 body {
   padding: 50px;
+
+  background-color: #E3EAEE;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
-  color: #00B7FF;
+  color: black;
+  text-decoration: none;
+}
+
+nav {
+  width: 790px;
+
+  border-radius: 5px;
+  padding: 25px;
+  margin: auto;
+
+  background: white;
+  text-align: right;
+
+  -webkit-box-shadow: 0px 6px 13px -8px rgba(0,0,0,0.75);
+  -moz-box-shadow: 0px 6px 13px -8px rgba(0,0,0,0.75);
+  box-shadow: 0px 6px 13px -8px rgba(0,0,0,0.75);
 }
 
 nav a {
   padding: 10px;
+}
+
+#content {
+  position: relative;
+  width: 795px;
+  height: 700px;
+
+  border-radius: 5px;
+  padding: 20px 0 0 45px;
+  margin: auto;
+
+  background: white;
+
+  -webkit-box-shadow: 0px 0px 15px -5px rgba(0,0,0,0.75);
+  -moz-box-shadow: 0px 0px 15px -5px rgba(0,0,0,0.75);
+  box-shadow: 0px 0px 15px -5px rgba(0,0,0,0.75);
+}
+
+#mainTitle {
+  position: relative;
+  top: -47px;
+  left: -255px;
+  width: 250px;
+
+  margin: auto;
+
+  font-size: 25px;
 }
 
 #gameCanvas {
