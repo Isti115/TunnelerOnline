@@ -12,14 +12,12 @@ block content
       p Lobby
         input.formField(type='text' name='lobbyName')#createGameLobbyName
       input(type='button' value='Create Game').button#createGameButton
+
   div#joinGameDiv.startGameDiv
-    h3 Join Game
-    form#joinGameForm
-      p Name
-        input.formField(type='text' name='name')#joinUserName
-      p Lobby
-        input.formField(type='text' name='lobbyName')#joinGameLobbyName
-      input(type='button' value='Join Game').button#joinGameButton
+    h3 Public games
+    br
+    center No public game found...
+    input(type='button' value='Join Game').button#joinGameButton
   h1 About Tunneler Online
   p Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam vehicula mi id lobortis tempus. Phasellus non nulla diam. Aliquam tellus est, cursus ac eros nec, feugiat gravida enim. Proin at eros a enim hendrerit accumsan non ut nunc. Curabitur lacinia rhoncus mauris, nec laoreet dui fringilla a. Nunc et egestas tellus. Vestibulum vestibulum felis ut euismod commodo.
 

@@ -16,18 +16,25 @@ function index_init() {
   // location.hash = '';
   
   document.getElementById('createGameButton').addEventListener('click', function() {
-    sessionStorage.setItem('userName', document.getElementById('startUserName').value);
-    
-    location.href = location.origin + '/lobby#' + document.getElementById('createGameLobbyName').value;
+    startGame();
   }, false);
-  
-  document.getElementById('joinGameButton').addEventListener('click', function() {
-    sessionStorage.setItem('userName', document.getElementById('joinUserName').value);
-    
-    location.href = location.origin + '/lobby#' +  document.getElementById('joinGameLobbyName').value;
-  }, false);
+
+  var formFields = document.getElementsByClassName('formField');
+  [].forEach.call(formFields, function(currField) {
+    currField.addEventListener('keypress', function(e) {
+      if (e.keyCode == 13) {
+        startGame();
+      }
+    }, false)
+  });
   
   console.log('Index initialized.');
+}
+
+function startGame() {
+  sessionStorage.setItem('userName', document.getElementById('startUserName').value);
+  
+  location.href = location.origin + '/lobby#' + document.getElementById('createGameLobbyName').value;
 }
 
 function messageIn(message) {
